@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오량 모의 창업 - 관리자 대시보드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root { font-family: 'Pretendard', sans-serif; }
+        body { background-color: #0f172a; color: #f8fafc; } /* Tailwind slate-900 */
+        
+        /* 스크롤바 커스텀 (다크테마) */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .chat-message-enter { animation: slideIn 0.2s ease-out forwards; }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col h-screen overflow-hidden">
+
+    <!-- 로그인 화면 -->
+    <div id="login-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900 bg-opacity-95 backdrop-blur-sm">
+        <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl text-center max-w-md w-full mx-4 border border-slate-700">
+            <div class="w-20 h-20 mx-auto mb-4 bg-lime-500 rounded-2xl flex items-center justify-center shadow-lg transform rotate-3">
+                <i class="fa-solid fa-user-shield text-4xl text-slate-900"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-white mb-1">관리자 시스템</h1>
+            <p class="text-slate-400 mb-8 text-sm">오량 모의투자 프로젝트 운영진 전용</p>
+            
+            <div class="mb-6 text-left">
+                <label class="block text-slate-300 text-sm font-bold mb-2" for="admin-password">관리자 접근 암호</label>
+                <input type="password" id="admin-password" placeholder="비밀번호 입력" class="w-full bg-slate-900 border border-slate-600 text-white rounded-xl py-3 px-4 focus:outline-none focus:border-lime-500 transition">
+            </div>
+
+            <button id="btn-auth" class="w-full bg-lime-500 text-slate-900 font-bold py-3 px-4 rounded-xl shadow-md hover:bg-lime-400 transition flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed">
+                접근 권한 확인 및 Google 로그인
+            </button>
+        </div>
+    </div>
+
+    <!-- 메인 네비게이션 -->
+    <nav id="main-nav" class="hidden bg-slate-800 border-b border-slate-700 shrink-0">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-server text-lime-400 text-xl"></i>
+                <span class="font-bold text-lg text-white tracking-tight">오량 Admin Center</span>
+            </div>
+            <div class="flex items-center gap-6 text-sm font-medium">
+                <button onclick="switchTab('market')" id="tab-market" class="text-lime-400 hover:text-lime-300 transition pb-1 border-b-2 border-lime-400">마켓 컨트롤</button>
+                <button onclick="switchTab('comm')" id="tab-comm" class="text-slate-400 hover:text-white transition pb-1 border-b-2 border-transparent">소통 & 접속자</button>
+                <button onclick="switchTab('reports')" id="tab-reports" class="text-slate-400 hover:text-white transition pb-1 border-b-2 border-transparent">팀 보고서</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 앱 메인 컨테이너 -->
+    <main id="app-container" class="hidden flex-1 max-w-7xl mx-auto w-full p-4 overflow-hidden flex flex-col h-full">
+        
+        <!-- 1. 마켓 컨트롤 탭 (그래프 + 주가 조작) -->
+        <div id="tab-content-market" class="flex-1 overflow-y-auto fade-in h-full pb-10">
+            <div class="flex justify-between items-end mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line text-lime-500"></i> 실시간 마켓 컨트롤
+                    </h2>
+                    <p class="text-slate-400 text-sm mt-1">모든 팀의 현재 주가를 모니터링하고 강제로 조정할 수 있습니다.</p>
+                </div>
+            </div>
+
+            <div id="admin-team-list" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- JS 동적 렌더링 -->
+            </div>
+        </div>
+
+        <!-- 2. 소통 & 접속자 탭 -->
+        <div id="tab-content-comm" class="hidden flex-1 fade-in h-full flex flex-col md:flex-row gap-6 pb-10">
+            <!-- 접속자 목록 -->
+            <div class="w-full md:w-1/3 bg-slate-800 rounded-2xl border border-slate-700 flex flex-col h-[70vh]">
+                <div class="p-4 border-b border-slate-700 bg-slate-800/50 rounded-t-2xl">
+                    <h3 class="font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-users text-blue-400"></i> 최근 접속 기록
+                    </h3>
+                </div>
+                <div class="flex-1 overflow-y-auto p-2" id="presence-list">
+                    <!-- JS 동적 렌더링 -->
+                </div>
+            </div>
+
+            <!-- 채팅방 -->
+            <div class="w-full md:w-2/3 bg-slate-800 rounded-2xl border border-slate-700 flex flex-col h-[70vh]">
+                <div class="p-4 border-b border-slate-700 bg-slate-800/50 rounded-t-2xl">
+                    <h3 class="font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-comments text-lime-400"></i> 관리자 실시간 통신망
+                    </h3>
+                </div>
+                <div class="flex-1 overflow-y-auto p-4 space-y-4" id="chat-messages">
+                    <!-- JS 동적 렌더링 -->
+                </div>
+                <div class="p-4 border-t border-slate-700 bg-slate-900/50 rounded-b-2xl">
+                    <form id="chat-form" class="flex gap-2">
+                        <input type="text" id="chat-input" placeholder="메시지를 입력하세요..." class="flex-1 bg-slate-700 border border-slate-600 text-white rounded-xl py-3 px-4 focus:outline-none focus:border-lime-500" required>
+                        <button type="submit" class="bg-lime-500 text-slate-900 font-bold px-6 py-3 rounded-xl hover:bg-lime-400 transition">
+                            전송
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. 보고서 탭 -->
+        <div id="tab-content-reports" class="hidden flex-1 overflow-y-auto fade-in h-full pb-10">
+            <div class="flex justify-between items-end mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-file-lines text-purple-400"></i> 팀별 보고서 아카이브
+                    </h2>
+                    <p class="text-slate-400 text-sm mt-1">제출된 사업계획서 및 보고서를 열람하고 업로드합니다.</p>
+                </div>
+                <button onclick="document.getElementById('report-modal').classList.remove('hidden')" class="bg-purple-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-purple-400 transition text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> 새 보고서 등록
+                </button>
+            </div>
+
+            <div id="reports-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                <!-- JS 동적 렌더링 -->
+            </div>
+        </div>
+    </main>
+
+    <!-- 보고서 등록 모달 -->
+    <div id="report-modal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4">
+        <div class="bg-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-600">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-white">새 보고서 등록</h3>
+                <button onclick="document.getElementById('report-modal').classList.add('hidden')" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <form id="report-form" class="space-y-4">
+                <div>
+                    <label class="block text-slate-300 text-sm mb-1">대상 팀</label>
+                    <select id="report-team" class="w-full bg-slate-700 border border-slate-600 text-white rounded-xl py-2 px-3 focus:outline-none focus:border-purple-500" required>
+                        <!-- 동적 옵션 추가 -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-slate-300 text-sm mb-1">문서 제목</label>
+                    <input type="text" id="report-title" class="w-full bg-slate-700 border border-slate-600 text-white rounded-xl py-2 px-3 focus:outline-none focus:border-purple-500" required>
+                </div>
+                <div>
+                    <label class="block text-slate-300 text-sm mb-1">내용 또는 링크</label>
+                    <textarea id="report-content" rows="4" class="w-full bg-slate-700 border border-slate-600 text-white rounded-xl py-2 px-3 focus:outline-none focus:border-purple-500" required></textarea>
+                </div>
+                <button type="submit" class="w-full bg-purple-500 text-white font-bold py-3 rounded-xl hover:bg-purple-400 transition mt-2">
+                    등록하기
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 커스텀 알림 모달 -->
+    <div id="custom-modal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-[60] p-4">
+        <div class="bg-slate-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-600 transform scale-95 opacity-0 transition-all duration-200" id="custom-modal-content">
+            <div class="text-center mb-4">
+                <div id="modal-icon" class="w-16 h-16 rounded-full mx-auto flex items-center justify-center mb-3">
+                    <i class="fa-solid fa-bell text-2xl"></i>
+                </div>
+                <h3 id="modal-title" class="text-xl font-bold text-white mb-2">알림</h3>
+                <p id="modal-message" class="text-slate-300 text-sm">메시지 내용</p>
+            </div>
+            <button onclick="closeModal()" class="w-full bg-lime-500 text-slate-900 font-bold py-3 rounded-xl hover:bg-lime-400 transition">
+                확인
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, addDoc, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // 학생용과 동일한 Firebase 설정을 입력하세요
+        const myFirebaseConfig = {
+            apiKey: "AIzaSyDhP7RYqg-fO9oXUfpVO0IRjAC8ryViHnQ",
+            authDomain: "dshs104-c68ff.firebaseapp.com",
+            projectId: "dshs104-c68ff",
+            storageBucket: "dshs104-c68ff.firebasestorage.app",
+            messagingSenderId: "78061547695",
+            appId: "1:78061547695:web:b37f666a0b15e67bb8245a",
+            measurementId: "G-WYF1GQNHND"
+        };
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'oryang-startup-mock';
+        let firebaseConfig = Object.keys(myFirebaseConfig).length > 0 ? myFirebaseConfig : {};
+        if (Object.keys(firebaseConfig).length === 0) {
+            try { firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {}; } 
+            catch (e) { firebaseConfig = {}; }
+        }
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        window.appState = {
+            user: null,
+            teams: [],
+            charts: {},
+            chatUnsubscribe: null,
+            reportsUnsubscribe: null,
+            presenceUnsubscribe: null
+        };
+
+        const formatMoney = (num) => num.toLocaleString('ko-KR') + '원';
+
+        window.showModal = (title, message, type = 'info') => {
+            const modal = document.getElementById('custom-modal');
+            const content = document.getElementById('custom-modal-content');
+            const iconContainer = document.getElementById('modal-icon');
+            const icon = iconContainer.querySelector('i');
+            
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+
+            if(type === 'success') {
+                iconContainer.className = 'w-16 h-16 rounded-full mx-auto flex items-center justify-center mb-3 bg-green-900/50 text-green-400 border border-green-800';
+                icon.className = 'fa-solid fa-check text-2xl';
+            } else if(type === 'error') {
+                iconContainer.className = 'w-16 h-16 rounded-full mx-auto flex items-center justify-center mb-3 bg-red-900/50 text-red-400 border border-red-800';
+                icon.className = 'fa-solid fa-triangle-exclamation text-2xl';
+            } else {
+                iconContainer.className = 'w-16 h-16 rounded-full mx-auto flex items-center justify-center mb-3 bg-lime-900/50 text-lime-400 border border-lime-800';
+                icon.className = 'fa-solid fa-info text-2xl';
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        };
+
+        window.closeModal = () => {
+            const modal = document.getElementById('custom-modal');
+            const content = document.getElementById('custom-modal-content');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 200);
+        };
+
+        window.switchTab = (tabId) => {
+            // 탭 컨텐츠 숨기기
+            ['market', 'comm', 'reports'].forEach(id => {
+                document.getElementById(`tab-content-${id}`).classList.add('hidden');
+                document.getElementById(`tab-${id}`).classList.remove('text-lime-400', 'border-lime-400');
+                document.getElementById(`tab-${id}`).classList.add('text-slate-400', 'border-transparent');
+            });
+            
+            // 선택된 탭 보이기
+            const target = document.getElementById(`tab-content-${tabId}`);
+            target.classList.remove('hidden');
+            document.getElementById(`tab-${tabId}`).classList.add('text-lime-400', 'border-lime-400');
+            document.getElementById(`tab-${tabId}`).classList.remove('text-slate-400', 'border-transparent');
+            
+            // 애니메이션 리셋
+            target.classList.remove('fade-in');
+            void target.offsetWidth; 
+            target.classList.add('fade-in');
+
+            if(tabId === 'market') renderMarketControl();
+        };
+
+        document.getElementById('btn-auth').addEventListener('click', async () => {
+            const pwInput = document.getElementById('admin-password').value;
+            // 초기 비밀번호 설정 (원하는 비밀번호로 변경하세요)
+            if (pwInput !== 'admin1234') {
+                window.showModal('접근 거부', '관리자 비밀번호가 일치하지 않습니다.', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btn-auth');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 인증 중...';
+            btn.disabled = true;
+
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token && Object.keys(myFirebaseConfig).length === 0) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else if (Object.keys(myFirebaseConfig).length > 0) {
+                    const provider = new GoogleAuthProvider();
+                    await signInWithPopup(auth, provider);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Auth error:", error);
+                window.showModal('인증 실패', `오류: ${error.message}`, 'error');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                window.appState.user = user;
+                
+                // 관리자 접속 기록 남기기 (존재 여부 등록)
+                registerPresence(user);
+                
+                // 데이터 실시간 구독 시작
+                subscribeTeamsData();
+                subscribeChat();
+                subscribeReports();
+                subscribePresence();
+
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-nav').classList.remove('hidden');
+                document.getElementById('app-container').classList.remove('hidden');
+                
+                switchTab('market');
+            } else {
+                document.getElementById('login-screen').classList.remove('hidden');
+                document.getElementById('main-nav').classList.add('hidden');
+                document.getElementById('app-container').classList.add('hidden');
+                
+                // 구독 해제
+                if(window.appState.chatUnsubscribe) window.appState.chatUnsubscribe();
+                if(window.appState.reportsUnsubscribe) window.appState.reportsUnsubscribe();
+                if(window.appState.presenceUnsubscribe) window.appState.presenceUnsubscribe();
+            }
+        });
+
+        async function registerPresence(user) {
+            const presenceRef = doc(db, 'artifacts', appId, 'public', 'data', 'presence', user.uid);
+            await setDoc(presenceRef, {
+                uid: user.uid,
+                email: user.email || '익명 관리자',
+                lastActive: Date.now()
+            });
+        }
+
+        function subscribeTeamsData() {
+            const teamsCol = collection(db, 'artifacts', appId, 'public', 'data', 'teams');
+            onSnapshot(teamsCol, (snapshot) => {
+                const teams = [];
+                snapshot.forEach(doc => {
+                    teams.push({ id: doc.id, ...doc.data() });
+                });
+                window.appState.teams = teams.sort((a,b) => b.price - a.price); // 가격순
+                
+                updateReportSelectOptions();
+                if(!document.getElementById('tab-content-market').classList.contains('hidden')) {
+                    renderMarketControl();
+                }
+            }, (error) => console.error("Teams sync error:", error));
+        }
+
+        function renderMarketControl() {
+            const container = document.getElementById('admin-team-list');
+            container.innerHTML = '';
+
+            window.appState.teams.forEach(team => {
+                const card = document.createElement('div');
+                card.className = 'bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-700 flex flex-col gap-4';
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-full ${team.color.replace('-100', '-900/50')} border border-slate-600 flex items-center justify-center shrink-0">
+                                <i class="fa-solid ${team.icon} text-xl text-slate-300"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg text-white">${team.name}</h3>
+                                <p class="text-xs text-slate-400">${team.product}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs text-slate-400 mb-1">현재 주가</div>
+                            <div class="font-bold text-xl text-lime-400">${formatMoney(team.price)}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="h-32 w-full relative bg-slate-900 rounded-xl p-2 border border-slate-700">
+                        <canvas id="admin-chart-${team.id}"></canvas>
+                    </div>
+
+                    <div class="flex gap-2 mt-2">
+                        <input type="number" id="price-input-${team.id}" value="${team.price}" class="flex-1 bg-slate-900 border border-slate-600 text-white rounded-xl py-2 px-3 text-center focus:outline-none focus:border-lime-500 font-bold">
+                        <button onclick="forceUpdatePrice('${team.id}')" class="bg-blue-600/20 text-blue-400 border border-blue-600 font-bold px-4 py-2 rounded-xl hover:bg-blue-600 hover:text-white transition whitespace-nowrap">
+                            적용
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+                
+                // 차트 그리기 지연 실행
+                setTimeout(() => renderAdminChart(team.id, team.history), 0);
+            });
+        }
+
+        function renderAdminChart(teamId, history) {
+            const ctx = document.getElementById(`admin-chart-${teamId}`);
+            if(!ctx) return;
+            
+            if(window.appState.charts[teamId]) {
+                window.appState.charts[teamId].destroy();
+            }
+
+            let chartData = history && history.length > 0 ? history : [0];
+            if(chartData.length < 5) {
+                const base = chartData[0];
+                chartData = [base, base, base, base, ...chartData].slice(-10);
+            } else {
+                chartData = chartData.slice(-15);
+            }
+
+            window.appState.charts[teamId] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartData.map((_, i) => i),
+                    datasets: [{
+                        data: chartData,
+                        borderColor: '#a3e635', // lime-400
+                        borderWidth: 2,
+                        tension: 0.1,
+                        pointBackgroundColor: '#a3e635',
+                        pointRadius: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { display: false },
+                        y: { display: true, grid: {color: '#334155'}, ticks: {color: '#94a3b8'} }
+                    },
+                    layout: { padding: 5 }
+                }
+            });
+        }
+
+        window.forceUpdatePrice = async (teamId) => {
+            if(!window.appState.user) return;
+            
+            const inputVal = document.getElementById(`price-input-${teamId}`).value;
+            const newPrice = parseInt(inputVal, 10);
+            
+            if(isNaN(newPrice) || newPrice < 0) {
+                window.showModal('오류', '올바른 금액을 입력하세요.', 'error');
+                return;
+            }
+
+            const team = window.appState.teams.find(t => t.id === teamId);
+            const teamRef = doc(db, 'artifacts', appId, 'public', 'data', 'teams', teamId);
+            const newHistory = [...(team.history || []), newPrice].slice(-20);
+
+            try {
+                await updateDoc(teamRef, {
+                    price: newPrice,
+                    history: newHistory
+                });
+                window.showModal('수정 완료', `${team.name}의 주가를 ${formatMoney(newPrice)}으로 강제 조정했습니다.`, 'success');
+            } catch(e) {
+                console.error(e);
+                window.showModal('오류', '주가 업데이트 중 문제가 발생했습니다.', 'error');
+            }
+        };
+
+        function subscribePresence() {
+            const presenceCol = collection(db, 'artifacts', appId, 'public', 'data', 'presence');
+            window.appState.presenceUnsubscribe = onSnapshot(presenceCol, (snapshot) => {
+                const list = document.getElementById('presence-list');
+                list.innerHTML = '';
+                
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const date = new Date(data.lastActive).toLocaleTimeString('ko-KR', { hour: '2-digit', minute:'2-digit' });
+                    
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center gap-3 p-3 hover:bg-slate-700/50 rounded-xl transition border-b border-slate-700/50 last:border-0';
+                    div.innerHTML = `
+                        <div class="w-8 h-8 bg-blue-900/50 text-blue-400 rounded-full flex items-center justify-center shrink-0 border border-blue-800">
+                            <i class="fa-solid fa-user-check text-sm"></i>
+                        </div>
+                        <div class="overflow-hidden">
+                            <div class="text-sm font-bold text-slate-200 truncate">${data.email.split('@')[0]}</div>
+                            <div class="text-xs text-slate-500">최근 접속: ${date}</div>
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+            }, (error) => console.error(error));
+        }
+
+        function subscribeChat() {
+            // Note: Rule 2 forbids orderBy in simple queries. We fetch all and sort in memory.
+            const chatCol = collection(db, 'artifacts', appId, 'public', 'data', 'chat');
+            window.appState.chatUnsubscribe = onSnapshot(chatCol, (snapshot) => {
+                let messages = [];
+                snapshot.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
+                
+                // 최신순으로 정렬 후 표시
+                messages.sort((a, b) => a.timestamp - b.timestamp);
+                
+                const container = document.getElementById('chat-messages');
+                container.innerHTML = '';
+                
+                messages.forEach(msg => {
+                    const isMe = msg.uid === window.appState.user?.uid;
+                    const time = new Date(msg.timestamp).toLocaleTimeString('ko-KR', { hour: '2-digit', minute:'2-digit' });
+                    
+                    const div = document.createElement('div');
+                    div.className = `flex flex-col chat-message-enter ${isMe ? 'items-end' : 'items-start'}`;
+                    div.innerHTML = `
+                        <span class="text-xs text-slate-500 mb-1 px-1">${msg.sender}</span>
+                        <div class="flex items-end gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}">
+                            <div class="${isMe ? 'bg-lime-500 text-slate-900' : 'bg-slate-700 text-white'} px-4 py-2 rounded-2xl max-w-[250px] md:max-w-md break-words shadow-sm">
+                                ${msg.text}
+                            </div>
+                            <span class="text-[10px] text-slate-500">${time}</span>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+                
+                // 스크롤 맨 아래로
+                container.scrollTop = container.scrollHeight;
+            }, (error) => console.error(error));
+        }
+
+        document.getElementById('chat-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if(!text || !window.appState.user) return;
+
+            input.value = '';
+            const chatCol = collection(db, 'artifacts', appId, 'public', 'data', 'chat');
+            try {
+                await addDoc(chatCol, {
+                    text: text,
+                    uid: window.appState.user.uid,
+                    sender: window.appState.user.email ? window.appState.user.email.split('@')[0] : '관리자',
+                    timestamp: Date.now()
+                });
+            } catch(e) {
+                console.error(e);
+                window.showModal('오류', '메시지 전송 실패', 'error');
+            }
+        });
+
+        function updateReportSelectOptions() {
+            const select = document.getElementById('report-team');
+            select.innerHTML = '';
+            window.appState.teams.forEach(team => {
+                const opt = document.createElement('option');
+                opt.value = team.id;
+                opt.textContent = team.name;
+                select.appendChild(opt);
+            });
+        }
+
+        function subscribeReports() {
+            const reportsCol = collection(db, 'artifacts', appId, 'public', 'data', 'reports');
+            window.appState.reportsUnsubscribe = onSnapshot(reportsCol, (snapshot) => {
+                let reports = [];
+                snapshot.forEach(doc => reports.push({ id: doc.id, ...doc.data() }));
+                
+                reports.sort((a, b) => b.timestamp - a.timestamp); // 최신순
+                
+                const container = document.getElementById('reports-list');
+                container.innerHTML = '';
+                
+                if(reports.length === 0) {
+                    container.innerHTML = '<div class="col-span-full text-center p-10 text-slate-500">등록된 보고서가 없습니다.</div>';
+                    return;
+                }
+
+                reports.forEach(report => {
+                    const team = window.appState.teams.find(t => t.id === report.teamId);
+                    const teamName = team ? team.name : '알 수 없는 팀';
+                    const date = new Date(report.timestamp).toLocaleDateString('ko-KR');
+
+                    const div = document.createElement('div');
+                    div.className = 'bg-slate-800 p-5 rounded-2xl border border-slate-700 hover:border-purple-500/50 transition cursor-pointer flex flex-col gap-2';
+                    div.innerHTML = `
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="bg-purple-900/50 text-purple-400 border border-purple-800 text-xs px-2 py-1 rounded-md font-bold">${teamName}</span>
+                            <span class="text-xs text-slate-500">${date}</span>
+                        </div>
+                        <h4 class="font-bold text-white text-lg line-clamp-1">${report.title}</h4>
+                        <p class="text-sm text-slate-400 line-clamp-3 mt-1">${report.content}</p>
+                    `;
+                    // 모달로 상세보기 (간단 구현)
+                    div.onclick = () => {
+                        window.showModal(`[${teamName}] ${report.title}`, report.content, 'info');
+                    };
+                    container.appendChild(div);
+                });
+            }, (error) => console.error(error));
+        }
+
+        document.getElementById('report-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if(!window.appState.user) return;
+
+            const teamId = document.getElementById('report-team').value;
+            const title = document.getElementById('report-title').value.trim();
+            const content = document.getElementById('report-content').value.trim();
+            
+            if(!title || !content) return;
+
+            const reportsCol = collection(db, 'artifacts', appId, 'public', 'data', 'reports');
+            try {
+                await addDoc(reportsCol, {
+                    teamId: teamId,
+                    title: title,
+                    content: content,
+                    author: window.appState.user.uid,
+                    timestamp: Date.now()
+                });
+                
+                document.getElementById('report-title').value = '';
+                document.getElementById('report-content').value = '';
+                document.getElementById('report-modal').classList.add('hidden');
+                
+                window.showModal('등록 완료', '새 보고서가 성공적으로 등록되었습니다.', 'success');
+            } catch(e) {
+                console.error(e);
+                window.showModal('오류', '보고서 등록 중 문제가 발생했습니다.', 'error');
+            }
+        });
+
+    </script>
+</body>
+</html>
