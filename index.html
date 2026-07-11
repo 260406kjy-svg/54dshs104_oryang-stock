@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오량 모의 창업 프로젝트 - 모의 주식 투자</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+        }
+        body {
+            background-color: #f7fee7; /* Tailwind lime-50 */
+            color: #3f6212; /* Tailwind lime-900 */
+        }
+        
+        /* 갤러리 무한 스크롤 애니메이션 */
+        .gallery-container {
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+        }
+        .gallery-track {
+            display: inline-block;
+            animation: scroll 20s linear infinite;
+        }
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        
+        /* 스크롤바 숨기기 */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #bef264; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #84cc16; }
+
+        /* 화면 전환 효과 */
+        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- 로그인 화면 -->
+    <div id="login-screen" class="flex-1 flex flex-col items-center justify-center bg-gradient-to-br from-lime-100 to-green-200">
+        <div class="bg-white p-8 rounded-2xl shadow-xl text-center max-w-md w-full mx-4">
+            <img src="image_bea9e8.png" onerror="this.onerror=null; this.src='https://placehold.co/150x150/ffffff/3f6212?text=대신고+로고';" alt="대전대신고등학교 로고" class="w-28 h-28 mx-auto mb-4 object-contain drop-shadow-md">
+            <h1 class="text-3xl font-bold text-lime-800 mb-2">오량 모의 창업</h1>
+            <p class="text-lime-600 mb-8">모의 주식 투자 프로그램</p>
+            
+            <button id="btn-login" class="w-full bg-white border border-gray-300 text-gray-700 font-semibold py-3 px-4 rounded-xl shadow-sm hover:bg-gray-50 transition flex items-center justify-center gap-3">
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-6 h-6" alt="Google">
+                Google 계정으로 시작하기
+            </button>
+            <p class="text-xs text-gray-400 mt-4">오량 모의 창업 프로젝트 참가자 전용</p>
+        </div>
+    </div>
+
+    <!-- 메인 네비게이션 (로그인 후 표시) -->
+    <nav id="main-nav" class="hidden bg-white shadow-md sticky top-0 z-40">
+        <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="navigate('dashboard')">
+                <img src="image_bea9e8.png" onerror="this.onerror=null; this.src='https://placehold.co/40x40/ffffff/3f6212?text=로고';" alt="로고" class="w-8 h-8 object-contain">
+                <span class="font-bold text-lg text-lime-800 tracking-tight">오량 모의투자</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <span id="nav-balance" class="text-sm font-semibold text-lime-700 hidden sm:block">0원</span>
+                <button onclick="navigate('profile')" class="w-10 h-10 rounded-full bg-lime-100 text-lime-600 flex items-center justify-center hover:bg-lime-200 transition">
+                    <i class="fa-solid fa-user"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 앱 메인 컨테이너 -->
+    <main id="app-container" class="hidden flex-1 max-w-5xl mx-auto w-full p-4 pb-20">
+        
+        <!-- 1. 대시보드 화면 -->
+        <div id="dashboard-screen" class="hidden fade-in">
+            <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-trophy text-yellow-500"></i> TOP 3 우량 기업
+            </h2>
+            
+            <!-- Top 3 그래프 영역 -->
+            <div id="top3-container" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <!-- JS에서 동적 렌더링 -->
+            </div>
+
+            <!-- 투자 탭으로 이동하는 배너 -->
+            <div onclick="navigate('invest')" class="bg-gradient-to-r from-lime-500 to-green-500 rounded-2xl p-6 text-white shadow-lg cursor-pointer hover:shadow-xl transition transform hover:-translate-y-1 mb-8 flex justify-between items-center">
+                <div>
+                    <h3 class="text-xl font-bold mb-1">본격적인 투자를 시작해볼까요?</h3>
+                    <p class="text-lime-100 text-sm">전체 기업 목록을 확인하고 매수/매도를 진행하세요.</p>
+                </div>
+                <div class="bg-white/20 p-3 rounded-full">
+                    <i class="fa-solid fa-arrow-right text-xl"></i>
+                </div>
+            </div>
+
+            <h2 class="text-xl font-bold mb-4">전체 기업 시세표</h2>
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-8 border border-lime-100">
+                <ul id="dashboard-team-list" class="divide-y divide-lime-50">
+                    <!-- JS에서 동적 렌더링 -->
+                </ul>
+            </div>
+
+            <h2 class="text-xl font-bold mb-4">참가팀 갤러리</h2>
+            <div class="gallery-container bg-white rounded-xl p-4 shadow-sm border border-lime-100">
+                <div id="gallery-track" class="gallery-track">
+                    <!-- JS에서 동적 렌더링 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 주식 투자 화면 -->
+        <div id="invest-screen" class="hidden fade-in">
+            <div class="flex justify-between items-end mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold">주식 거래소</h2>
+                    <p class="text-gray-500 text-sm mt-1">보유 자산: <span id="invest-balance" class="font-bold text-lime-700">0원</span></p>
+                </div>
+            </div>
+
+            <div id="invest-team-list" class="space-y-4">
+                <!-- JS에서 동적 렌더링 -->
+            </div>
+        </div>
+
+        <!-- 3. 프로필 화면 -->
+        <div id="profile-screen" class="hidden fade-in">
+            <h2 class="text-2xl font-bold mb-6">내 프로필 및 자산</h2>
+            
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-lime-100 mb-6">
+                <h3 class="text-lg font-bold mb-4 border-b pb-2">기본 정보</h3>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <div class="flex-1">
+                        <label class="block text-sm text-gray-500 mb-1">학년</label>
+                        <select id="profile-grade" class="w-full p-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-lime-500">
+                            <option value="1">1학년</option>
+                            <option value="2">2학년</option>
+                            <option value="3">3학년</option>
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-sm text-gray-500 mb-1">반</label>
+                        <select id="profile-class" class="w-full p-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-lime-500">
+                            <option value="1">1반</option>
+                            <option value="2">2반</option>
+                            <option value="3">3반</option>
+                            <option value="4">4반</option>
+                            <option value="5">5반</option>
+                            <option value="6">6반</option>
+                            <option value="7">7반</option>
+                            <option value="8">8반</option>
+                            <option value="8">9반</option>
+                            <option value="8">10반</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="saveProfile()" class="mt-4 w-full bg-lime-500 text-white font-bold py-3 rounded-xl hover:bg-lime-600 transition">정보 저장하기</button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="bg-lime-600 text-white rounded-2xl p-6 shadow-sm relative overflow-hidden">
+                    <i class="fa-solid fa-wallet text-6xl absolute -right-2 -bottom-4 opacity-20"></i>
+                    <h3 class="text-lime-100 text-sm font-medium mb-1">총 보유 현금</h3>
+                    <div class="text-3xl font-bold" id="profile-cash">0원</div>
+                </div>
+                <div class="bg-emerald-600 text-white rounded-2xl p-6 shadow-sm relative overflow-hidden">
+                    <i class="fa-solid fa-chart-pie text-6xl absolute -right-2 -bottom-4 opacity-20"></i>
+                    <h3 class="text-emerald-100 text-sm font-medium mb-1">총 평가 자산 (현금 + 주식)</h3>
+                    <div class="text-3xl font-bold" id="profile-total-asset">0원</div>
+                </div>
+            </div>
+
+            <h3 class="text-xl font-bold mb-4">내 포트폴리오</h3>
+            <div class="bg-white rounded-xl shadow-sm border border-lime-100 overflow-hidden">
+                <ul id="profile-portfolio-list" class="divide-y divide-lime-50">
+                    <!-- JS에서 동적 렌더링 -->
+                </ul>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 커스텀 알림 모달 -->
+    <div id="custom-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl transform scale-95 opacity-0 transition-all duration-200" id="custom-modal-content">
+            <div class="text-center mb-4">
+                <div id="modal-icon" class="w-16 h-16 rounded-full mx-auto flex items-center justify-center mb-3">
+                    <i class="fa-solid fa-bell text-2xl"></i>
+                </div>
+                <h3 id="modal-title" class="text-xl font-bold text-gray-800 mb-2">알림</h3>
+                <p id="modal-message" class="text-gray-600">메시지 내용</p>
+            </div>
+            <button onclick="closeModal()" class="w-full bg-lime-500 text-white font-bold py-3 rounded-xl hover:bg-lime-600 transition">
+                확인
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // ==========================================
+        // 💡 [필수] 학생들에게 배포할 때는 여기에 실제 Firebase 환경설정을 넣으세요!
+        // ==========================================
+        const myFirebaseConfig = {
+            apiKey: "AIzaSyDhP7RYqg-fO9oXUfpVO0IRjAC8ryViHnQ",
+            authDomain: "dshs104-c68ff.firebaseapp.com",
+            projectId: "dshs104-c68ff",
+            storageBucket: "dshs104-c68ff.firebasestorage.app",
+            messagingSenderId: "78061547695",
+            appId: "1:78061547695:web:b37f666a0b15e67bb8245a",
+            measurementId: "G-WYF1GQNHND"
+        };
+
+        // Firebase 설정 (미리보기 환경과 실제 배포 환경 모두 호환되도록 구성)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'oryang-startup-mock';
+        let firebaseConfig = Object.keys(myFirebaseConfig).length > 0 ? myFirebaseConfig : {};
+        
+        if (Object.keys(firebaseConfig).length === 0) {
+            try {
+                firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+            } catch (e) {
+                console.error("Firebase config error", e);
+                firebaseConfig = {};
+            }
+        }
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // 전역 상태 변수
+        window.appState = {
+            user: null,
+            userData: null,
+            teams: [],
+            charts: {} // Chart.js 인스턴스 저장용
+        };
+
+        let userDocUnsubscribe = null;
+        let teamsUnsubscribe = null;
+
+        // 숫자 콤마 포맷팅
+        const formatMoney = (num) => {
+            return num.toLocaleString('ko-KR') + '원';
+        };
+
+        // 모달 헬퍼 함수
+        window.showModal = (title, message, type = 'info') => {
+            const modal = document.getElementById('custom-modal');
+            const content = document.getElementById('custom-modal-content');
+            const iconContainer = document.getElementById('modal-icon');
+            const icon = iconContainer.querySelector('i');
+            
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+
+            if(type === 'success') {
+                iconContainer.className = 'w-16 h-16 rounded-full mx-auto flex items-center justify-center mb-3 bg-green-100 text-green-600';
+                icon.className = 'fa-solid fa-check text-2xl';
+            } else if(type === 'error') {
+                iconContainer.className = 'w-16 h-16 rounded-full mx-auto flex items-center justify-center mb-3 bg-red-100 text-red-600';
+                icon.className = 'fa-solid fa-triangle-exclamation text-2xl';
+            } else {
+                iconContainer.className = 'w-16 h-16 rounded-full mx-auto flex items-center justify-center mb-3 bg-lime-100 text-lime-600';
+                icon.className = 'fa-solid fa-bell text-2xl';
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        };
+
+        window.closeModal = () => {
+            const modal = document.getElementById('custom-modal');
+            const content = document.getElementById('custom-modal-content');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 200);
+        };
+
+        // 화면 네비게이션
+        window.navigate = (screenId) => {
+            const screens = ['dashboard', 'invest', 'profile'];
+            screens.forEach(id => {
+                document.getElementById(`${id}-screen`).classList.add('hidden');
+            });
+            
+            const target = document.getElementById(`${screenId}-screen`);
+            target.classList.remove('hidden');
+            
+            // 애니메이션 재시작
+            target.classList.remove('fade-in');
+            void target.offsetWidth; 
+            target.classList.add('fade-in');
+
+            window.scrollTo(0, 0);
+
+            if (screenId === 'dashboard') {
+                renderDashboard();
+            } else if (screenId === 'invest') {
+                renderInvest();
+            } else if (screenId === 'profile') {
+                renderProfile();
+            }
+        };
+
+        // 로그인 처리
+        document.getElementById('btn-login').addEventListener('click', async () => {
+            const btn = document.getElementById('btn-login');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 로그인 중...';
+            btn.disabled = true;
+
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token && Object.keys(myFirebaseConfig).length === 0) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else if (Object.keys(myFirebaseConfig).length > 0) {
+                    // 실제 Firebase 설정이 입력된 경우 진짜 구글 로그인 팝업 띄우기
+                    const provider = new GoogleAuthProvider();
+                    await signInWithPopup(auth, provider);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Auth error:", error);
+                window.showModal('로그인 실패', '시스템에 문제가 발생했습니다.', 'error');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        // 인증 상태 모니터링
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                window.appState.user = user;
+                await initializeUserData(user.uid);
+                await initializeTeamsData();
+                
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-nav').classList.remove('hidden');
+                document.getElementById('app-container').classList.remove('hidden');
+                
+                navigate('dashboard');
+            } else {
+                document.getElementById('login-screen').classList.remove('hidden');
+                document.getElementById('main-nav').classList.add('hidden');
+                document.getElementById('app-container').classList.add('hidden');
+                
+                if(userDocUnsubscribe) userDocUnsubscribe();
+                if(teamsUnsubscribe) teamsUnsubscribe();
+            }
+        });
+
+        // 사용자 데이터 초기화 및 구독
+        async function initializeUserData(userId) {
+            const userRef = doc(db, 'artifacts', appId, 'users', userId, 'profile', 'data');
+            const userSnap = await getDoc(userRef);
+
+            if (!userSnap.exists()) {
+                // 신규 유저 초기 자금 10,000,000원 설정
+                await setDoc(userRef, {
+                    grade: '1',
+                    class: '1',
+                    balance: 10000000,
+                    portfolio: {} // { teamId: amount }
+                });
+            }
+
+            // 실시간 구독
+            userDocUnsubscribe = onSnapshot(userRef, (doc) => {
+                window.appState.userData = doc.data();
+                updateGlobalUI();
+                // 현재 켜져있는 화면 다시 렌더링
+                if(!document.getElementById('dashboard-screen').classList.contains('hidden')) renderDashboard();
+                if(!document.getElementById('invest-screen').classList.contains('hidden')) renderInvest();
+                if(!document.getElementById('profile-screen').classList.contains('hidden')) renderProfile();
+            }, (error) => {
+                console.error("User data sync error:", error);
+            });
+        }
+
+        // 팀 데이터 초기화 (Seed) 및 구독
+        async function initializeTeamsData() {
+            const teamsCol = collection(db, 'artifacts', appId, 'public', 'data', 'teams');
+            const snapshot = await getDocs(teamsCol);
+            
+            if (snapshot.empty) {
+                // 가상의 창업 팀 데이터 생성 (최초 1회)
+                const mockTeams = [
+                    { id: 'team_a', name: '에코라이프', product: '친환경 스마트 텀블러', price: 5000, history: [5000], color: 'bg-green-100', icon: 'fa-leaf' },
+                    { id: 'team_b', name: '스마트학습', product: 'AI 맞춤형 플래너', price: 6200, history: [6200], color: 'bg-blue-100', icon: 'fa-book-open' },
+                    { id: 'team_c', name: '헬시스낵', product: '단백질 듬뿍 비건 쿠키', price: 4800, history: [4800], color: 'bg-yellow-100', icon: 'fa-cookie' },
+                    { id: 'team_d', name: '테크노베이션', product: '초보자 코딩 교육 키트', price: 7500, history: [7500], color: 'bg-purple-100', icon: 'fa-microchip' },
+                    { id: 'team_e', name: '아트메이커', product: '나만의 커스텀 굿즈 제작', price: 4100, history: [4100], color: 'bg-pink-100', icon: 'fa-palette' },
+                ];
+                
+                const batch = writeBatch(db);
+                mockTeams.forEach(team => {
+                    const docRef = doc(teamsCol, team.id);
+                    batch.set(docRef, team);
+                });
+                await batch.commit();
+            }
+
+            // 실시간 구독
+            teamsUnsubscribe = onSnapshot(teamsCol, (snapshot) => {
+                const teams = [];
+                snapshot.forEach(doc => {
+                    teams.push({ id: doc.id, ...doc.data() });
+                });
+                
+                window.appState.teams = teams;
+                
+                if(!document.getElementById('dashboard-screen').classList.contains('hidden')) renderDashboard();
+                if(!document.getElementById('invest-screen').classList.contains('hidden')) renderInvest();
+                if(!document.getElementById('profile-screen').classList.contains('hidden')) renderProfile();
+            }, (error) => {
+                console.error("Teams sync error:", error);
+            });
+        }
+
+        function updateGlobalUI() {
+            if(window.appState.userData) {
+                document.getElementById('nav-balance').textContent = formatMoney(window.appState.userData.balance);
+                document.getElementById('invest-balance').textContent = formatMoney(window.appState.userData.balance);
+            }
+        }
+
+        function renderDashboard() {
+            if(!window.appState.teams.length) return;
+            
+            // 1. 탑 3 계산 (가격순 정렬)
+            const sortedTeams = [...window.appState.teams].sort((a, b) => b.price - a.price);
+            const top3 = sortedTeams.slice(0, 3);
+            
+            const top3Container = document.getElementById('top3-container');
+            top3Container.innerHTML = '';
+            
+            top3.forEach((team, index) => {
+                const medals = ['<i class="fa-solid fa-medal text-yellow-400 text-xl"></i>', '<i class="fa-solid fa-medal text-gray-400 text-xl"></i>', '<i class="fa-solid fa-medal text-amber-600 text-xl"></i>'];
+                
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-2xl shadow-sm border border-lime-100 flex flex-col justify-between';
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                ${medals[index]}
+                                <h3 class="font-bold text-gray-800">${team.name}</h3>
+                            </div>
+                            <p class="text-xs text-gray-500 truncate w-32">${team.product}</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-lime-700">${formatMoney(team.price)}</div>
+                        </div>
+                    </div>
+                    <div class="h-32 w-full relative mt-2">
+                        <canvas id="chart-${team.id}"></canvas>
+                    </div>
+                `;
+                top3Container.appendChild(card);
+                
+                // Chart.js 렌더링
+                setTimeout(() => renderMiniChart(team.id, team.history), 0);
+            });
+
+            // 2. 전체 리스트
+            const listContainer = document.getElementById('dashboard-team-list');
+            listContainer.innerHTML = '';
+            sortedTeams.forEach((team, idx) => {
+                const li = document.createElement('li');
+                li.className = 'p-4 flex items-center justify-between hover:bg-lime-50 transition';
+                li.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full ${team.color} flex items-center justify-center text-gray-600">
+                            <i class="fa-solid ${team.icon}"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-gray-800">${idx + 1}. ${team.name}</div>
+                            <div class="text-xs text-gray-500">${team.product}</div>
+                        </div>
+                    </div>
+                    <div class="font-bold text-lime-700">${formatMoney(team.price)}</div>
+                `;
+                listContainer.appendChild(li);
+            });
+
+            // 3. 갤러리 렌더링
+            const galleryTrack = document.getElementById('gallery-track');
+            // 무한 스크롤을 위해 요소를 2배로 늘림
+            const galleryHtml = sortedTeams.map(team => `
+                <div class="inline-block mx-3 w-40 bg-gray-50 rounded-xl overflow-hidden border border-gray-100 shadow-sm align-top transition-transform hover:-translate-y-1">
+                    <div class="h-32 ${team.color} flex items-center justify-center">
+                        <i class="fa-solid ${team.icon} text-5xl text-gray-600 opacity-50"></i>
+                    </div>
+                    <div class="p-4">
+                        <h4 class="font-bold text-sm text-gray-800 truncate">${team.name}</h4>
+                        <p class="text-xs text-gray-500 truncate mt-1">${team.product}</p>
+                    </div>
+                </div>
+            `).join('');
+            galleryTrack.innerHTML = galleryHtml + galleryHtml; // 두번 붙여서 끊김 방지
+        }
+
+        function renderMiniChart(teamId, history) {
+            const ctx = document.getElementById(`chart-${teamId}`);
+            if(!ctx) return;
+            
+            if(window.appState.charts[teamId]) {
+                window.appState.charts[teamId].destroy();
+            }
+
+            // 히스토리가 짧으면 임의의 이전 데이터 생성 (시각적 효과)
+            let chartData = [...history];
+            if(chartData.length < 5) {
+                const base = chartData[0];
+                chartData = [base, base, base, base, ...chartData].slice(-5);
+            } else {
+                chartData = chartData.slice(-10); // 최근 10개만
+            }
+
+            window.appState.charts[teamId] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartData.map((_, i) => i),
+                    datasets: [{
+                        data: chartData,
+                        borderColor: '#84cc16', // lime-500
+                        borderWidth: 2,
+                        tension: 0.3,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                    scales: {
+                        x: { display: false },
+                        y: { display: false, min: Math.min(...chartData) * 0.9, max: Math.max(...chartData) * 1.1 }
+                    },
+                    layout: { padding: 0 }
+                }
+            });
+        }
+
+        function renderInvest() {
+            const container = document.getElementById('invest-team-list');
+            container.innerHTML = '';
+            
+            const portfolio = window.appState.userData?.portfolio || {};
+
+            window.appState.teams.forEach(team => {
+                const myShares = portfolio[team.id] || 0;
+                
+                const div = document.createElement('div');
+                div.className = 'bg-white p-6 rounded-2xl shadow-sm border border-lime-100 flex flex-col md:flex-row justify-between items-center gap-6';
+                div.innerHTML = `
+                    <div class="flex-1 w-full flex items-center gap-5">
+                        <div class="w-16 h-16 rounded-full ${team.color} flex items-center justify-center shrink-0">
+                            <i class="fa-solid ${team.icon} text-3xl text-gray-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-xl text-gray-800">${team.name}</h3>
+                            <p class="text-sm text-gray-500 mb-1">${team.product}</p>
+                            <div class="font-semibold text-lime-700 text-lg">현재가: ${formatMoney(team.price)}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="w-full md:w-auto flex flex-col items-center gap-1 bg-gray-50 p-4 rounded-xl min-w-[120px]">
+                        <span class="text-sm text-gray-500">내 보유 주식</span>
+                        <span class="font-bold text-2xl text-gray-800">${myShares}주</span>
+                    </div>
+
+                    <div class="w-full md:w-auto flex gap-3 shrink-0">
+                        <button onclick="trade('${team.id}', 'buy')" class="flex-1 md:flex-none bg-red-50 text-red-600 font-bold px-8 py-4 rounded-xl hover:bg-red-100 transition border border-red-200 text-lg">
+                            매수
+                        </button>
+                        <button onclick="trade('${team.id}', 'sell')" class="flex-1 md:flex-none bg-blue-50 text-blue-600 font-bold px-8 py-4 rounded-xl hover:bg-blue-100 transition border border-blue-200 text-lg">
+                            매도
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // 주식 거래 로직 (상대가치 평가 포함)
+        window.trade = async (teamId, type) => {
+            if(!window.appState.user) return;
+            const userId = window.appState.user.uid;
+            
+            const team = window.appState.teams.find(t => t.id === teamId);
+            const userRef = doc(db, 'artifacts', appId, 'users', userId, 'profile', 'data');
+            const teamRef = doc(db, 'artifacts', appId, 'public', 'data', 'teams', teamId);
+            
+            // 데이터 최신화 (메모리상 데이터 기반으로 체크 후 트랜잭션 없이 간단히 구현)
+            const currentBalance = window.appState.userData.balance;
+            const currentPortfolio = { ...window.appState.userData.portfolio };
+            const myShares = currentPortfolio[teamId] || 0;
+            const price = team.price;
+
+            if (type === 'buy') {
+                if (currentBalance < price) {
+                    window.showModal('매수 실패', '보유 현금이 부족합니다.', 'error');
+                    return;
+                }
+                
+                // 상대가치 평가: 매수 시 주가 소폭 상승 (예: 1% 상승, 최소 10원)
+                const priceIncrease = Math.max(10, Math.floor(price * 0.01));
+                const newPrice = price + priceIncrease;
+                const newHistory = [...(team.history || []), newPrice].slice(-20); // 최대 20개 저장
+
+                currentPortfolio[teamId] = myShares + 1;
+                
+                try {
+                    await updateDoc(userRef, {
+                        balance: currentBalance - price,
+                        portfolio: currentPortfolio
+                    });
+                    
+                    await updateDoc(teamRef, {
+                        price: newPrice,
+                        history: newHistory
+                    });
+                    
+                    window.showModal('매수 체결', `${team.name} 1주를 ${formatMoney(price)}에 매수했습니다.\n(수요 증가로 주가 ${formatMoney(priceIncrease)} 상승)`, 'success');
+                } catch(e) {
+                    console.error(e);
+                    window.showModal('오류', '거래 중 오류가 발생했습니다.', 'error');
+                }
+
+            } else if (type === 'sell') {
+                if (myShares <= 0) {
+                    window.showModal('매도 실패', '보유한 주식이 없습니다.', 'error');
+                    return;
+                }
+
+                // 상대가치 평가: 매도 시 주가 소폭 하락 (예: 1% 하락, 최소 10원)
+                const priceDecrease = Math.max(10, Math.floor(price * 0.01));
+                const newPrice = Math.max(100, price - priceDecrease); // 최소가 100원 방어
+                const newHistory = [...(team.history || []), newPrice].slice(-20);
+
+                if (myShares - 1 === 0) {
+                    delete currentPortfolio[teamId];
+                } else {
+                    currentPortfolio[teamId] = myShares - 1;
+                }
+
+                try {
+                    await updateDoc(userRef, {
+                        balance: currentBalance + price,
+                        portfolio: currentPortfolio
+                    });
+                    
+                    await updateDoc(teamRef, {
+                        price: newPrice,
+                        history: newHistory
+                    });
+                    
+                    window.showModal('매도 체결', `${team.name} 1주를 ${formatMoney(price)}에 매도하여 입금되었습니다.\n(공급 증가로 주가 ${formatMoney(priceDecrease)} 하락)`, 'success');
+                } catch(e) {
+                    console.error(e);
+                    window.showModal('오류', '거래 중 오류가 발생했습니다.', 'error');
+                }
+            }
+        };
+
+        function renderProfile() {
+            const userData = window.appState.userData;
+            if(!userData) return;
+
+            document.getElementById('profile-grade').value = userData.grade || '1';
+            document.getElementById('profile-class').value = userData.class || '1';
+            
+            document.getElementById('profile-cash').textContent = formatMoney(userData.balance);
+
+            let totalStockValue = 0;
+            const portfolio = userData.portfolio || {};
+            const listContainer = document.getElementById('profile-portfolio-list');
+            listContainer.innerHTML = '';
+
+            if (Object.keys(portfolio).length === 0) {
+                listContainer.innerHTML = '<li class="p-6 text-center text-gray-500">보유중인 주식이 없습니다.</li>';
+            } else {
+                for (const [teamId, shares] of Object.entries(portfolio)) {
+                    const team = window.appState.teams.find(t => t.id === teamId);
+                    if (team && shares > 0) {
+                        const currentValue = team.price * shares;
+                        totalStockValue += currentValue;
+                        
+                        const li = document.createElement('li');
+                        li.className = 'p-4 flex justify-between items-center';
+                        li.innerHTML = `
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full ${team.color} flex items-center justify-center">
+                                    <i class="fa-solid ${team.icon} text-sm"></i>
+                                </div>
+                                <div>
+                                    <div class="font-bold">${team.name}</div>
+                                    <div class="text-xs text-gray-500">${shares}주 보유</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-bold text-lime-700">${formatMoney(currentValue)}</div>
+                                <div class="text-xs text-gray-500">@${formatMoney(team.price)}</div>
+                            </div>
+                        `;
+                        listContainer.appendChild(li);
+                    }
+                }
+            }
+
+            document.getElementById('profile-total-asset').textContent = formatMoney(userData.balance + totalStockValue);
+        }
+
+        window.saveProfile = async () => {
+            if(!window.appState.user) return;
+            
+            const grade = document.getElementById('profile-grade').value;
+            const cls = document.getElementById('profile-class').value;
+            const userId = window.appState.user.uid;
+            
+            const userRef = doc(db, 'artifacts', appId, 'users', userId, 'profile', 'data');
+            
+            try {
+                await updateDoc(userRef, {
+                    grade: grade,
+                    class: cls
+                });
+                window.showModal('저장 완료', '프로필 정보가 성공적으로 업데이트되었습니다.', 'success');
+            } catch(e) {
+                console.error(e);
+                window.showModal('오류', '저장 중 문제가 발생했습니다.', 'error');
+            }
+        };
+
+    </script>
+</body>
+</html>
