@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오량 모의 창업 프로젝트 - 투자자 모집</title>
+    
+    <!-- 1. 눈누 페이퍼로지(Paperlogy) 폰트 불러오기 -->
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/Paperlogy.css');
+        
+        :root {
+            --font-paper: 'Paperlogy', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            font-family: var(--font-paper);
+            scroll-behavior: smooth;
+        }
+
+        /* 홍보용 페이지 전용 부드러운 등장 애니메이션 */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+    </style>
+
+    <!-- 2. Tailwind CSS CDN 로드 및 메인 컬러(연두색) 설정 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f4fdf0',
+                            100: '#e5fbe0',
+                            200: '#cef6c1',
+                            300: '#a5ed91',
+                            400: '#8DE969', /* 메인 연두색 */
+                            500: '#55cc2b',
+                            600: '#3fa61e',
+                            700: '#317f1b',
+                            800: '#2a641a',
+                            900: '#25541a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- 3. FontAwesome 아이콘 로드 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-white text-slate-800 antialiased selection:bg-brand-400 selection:text-slate-900">
+
+    <!-- 네비게이션 바 -->
+    <nav class="fixed w-full z-50 bg-white/80 backdrop-blur-lg border-b border-slate-100 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16 md:h-20">
+                <div class="flex items-center cursor-pointer" onclick="window.scrollTo(0,0)">
+                    <div class="w-10 h-10 bg-brand-400 rounded-xl flex items-center justify-center text-slate-900 font-bold text-xl mr-3 shadow-lg shadow-brand-400/30">
+                        <i class="fa-solid fa-rocket"></i>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-500 font-bold tracking-widest uppercase block leading-none mb-1">DSHS 104 </span>
+                        <span class="text-lg font-black text-slate-900 tracking-tight leading-none">오량 모의 창업 프로젝트 </span>
+                    </div>
+                </div>
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="#about" class="text-sm font-bold text-slate-600 hover:text-brand-600 transition-colors">프로젝트 소개</a>
+                    <a href="#teams" class="text-sm font-bold text-slate-600 hover:text-brand-600 transition-colors">스타트업 라인업</a>
+                    <a href="#invest" class="text-sm font-bold text-slate-600 hover:text-brand-600 transition-colors">모의 투자 안내</a>
+                    <a href="#invest" class="px-5 py-2.5 bg-slate-900 text-white text-sm font-extrabold rounded-full hover:bg-brand-500 hover:text-slate-900 transition-all duration-300 shadow-lg shadow-slate-900/20">
+                        투자 사이트 바로가기
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 히어로 배너 영역 (시선을 사로잡는 강렬한 첫인상) -->
+    <section class="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden bg-slate-950">
+        <!-- 배경 장식 (연두색 글로우 효과) -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-brand-500/20 rounded-full blur-[120px] pointer-events-none"></div>
+        <div class="absolute bottom-0 right-0 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+        
+        <!-- 장식용 그리드 패턴 -->
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3N2Zz4=')] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
+
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8 opacity-0 animate-fade-in-up">
+            <div class="inline-flex items-center px-4 py-2 rounded-full border border-brand-400/30 bg-brand-400/10 text-brand-400 text-xs sm:text-sm font-extrabold tracking-wide">
+                <span class="w-2 h-2 bg-brand-400 rounded-full mr-2 animate-pulse"></span>
+                2026 대전대신고 1학년 4반 학급특색사업
+            </div>
+            
+            <h1 class="text-4xl md:text-6xl lg:text-7xl font-black text-white tracking-tight leading-tight">
+                세상을 바꿀 아이디어,<br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-300 to-emerald-400">오량 모의 창업 프로젝트</span>
+            </h1>
+            
+            <p class="text-base md:text-xl text-slate-400 max-w-2xl mx-auto font-medium leading-relaxed delay-100 opacity-0 animate-fade-in-up">
+                린 스타트업(Lean Startup) 방식을 적용한 실전형 진로 탐색.<br class="hidden sm:block">
+                아이디어 기획부터 시제품 개발, 마케팅, 그리고 모의 상장(IPO)까지.<br>
+                1학년 4반 학생들의 혁신적인 여정에 여러분을 초대합니다.
+            </p>
+            
+            <div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4 delay-200 opacity-0 animate-fade-in-up">
+                <a href="#teams" class="w-full sm:w-auto px-8 py-4 bg-brand-400 text-slate-900 rounded-2xl font-black text-lg hover:bg-brand-300 hover:scale-105 transition-all duration-300 shadow-[0_0_40px_-10px_rgba(141,233,105,0.5)]">
+                    참여 기업 살펴보기 <i class="fa-solid fa-arrow-down ml-2"></i>
+                </a>
+                <a href="#invest" class="w-full sm:w-auto px-8 py-4 bg-slate-800 text-white border border-slate-700 rounded-2xl font-bold text-lg hover:bg-slate-700 hover:border-slate-500 transition-all duration-300">
+                    모의 투자 알아보기
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 프로젝트 핵심 소개 영역 -->
+    <section id="about" class="py-24 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
+                <h2 class="text-3xl md:text-4xl font-black text-slate-900">단순한 과제가 아닌, <span class="text-brand-600">진짜 비즈니스</span></h2>
+                <p class="text-slate-600 font-medium">오량 모의 창업 프로젝트는 실제 시장의 흐름을 경험하는 20차시 장기 프로젝트입니다.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- 특징 1 -->
+                <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-brand-300 transition-all duration-300 group">
+                    <div class="w-14 h-14 bg-brand-100 text-brand-600 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 group-hover:bg-brand-400 group-hover:text-slate-900 transition-all">
+                        <i class="fa-solid fa-lightbulb"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-900 mb-3">린 스타트업(Lean Startup)</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed">
+                        최소기능제품(MVP)을 빠르게 개발하고, 고객의 피드백을 통해 아이템을 검증하고 보완하는 실리콘밸리의 창업 방식을 그대로 배웁니다.
+                    </p>
+                </div>
+                
+                <!-- 특징 2 -->
+                <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-brand-300 transition-all duration-300 group">
+                    <div class="w-14 h-14 bg-brand-100 text-brand-600 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 group-hover:bg-brand-400 group-hover:text-slate-900 transition-all">
+                        <i class="fa-solid fa-bullhorn"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-900 mb-3">직접 발로 뛰는 마케팅</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed">
+                        각 팀의 홍보 담당자들이 제품 포지셔닝을 설정하고, 영상 촬영 및 교내 캠페인을 통해 타 학급 학생들의 마음을 사로잡기 위해 경쟁합니다.
+                    </p>
+                </div>
+
+                <!-- 특징 3 -->
+                <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-brand-300 transition-all duration-300 group">
+                    <div class="w-14 h-14 bg-brand-100 text-brand-600 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 group-hover:bg-brand-400 group-hover:text-slate-900 transition-all">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-900 mb-3">모의 상장(IPO) 및 주식 거래</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed">
+                        개발된 웹사이트를 통해 상장 심사를 거친 기업들의 주식이 거래됩니다. 치열한 기업 가치 평가와 실시간 모의 투자가 이루어집니다.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 스타트업 팀 라인업 (홍보용으로 디자인을 강화하고 핵심 인력만 표기) -->
+    <section id="teams" class="py-24 bg-white relative overflow-hidden">
+        <div class="absolute left-0 top-1/4 w-64 h-64 bg-brand-50 rounded-full blur-[80px] -z-10"></div>
+        <div class="absolute right-0 bottom-1/4 w-96 h-96 bg-brand-100 rounded-full blur-[100px] -z-10 opacity-50"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-16 space-y-4 md:space-y-0">
+                <div>
+                    <span class="text-brand-600 font-extrabold tracking-wider text-sm">MEET THE STARTUPS</span>
+                    <h2 class="text-3xl md:text-5xl font-black text-slate-900 mt-2">미래를 주도할 4개의 TEAMS</h2>
+                </div>
+                <p class="text-slate-500 text-sm md:text-right font-medium max-w-sm">
+                    각 분야의 애널리스트, 디자이너, 마케터가 모여 혁신적인 아이템을 기획하고 있습니다. 당신의 원픽은 어디입니까?
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <!-- 1팀 -->
+                <div class="group relative bg-slate-900 rounded-[2rem] overflow-hidden p-8 hover:transform hover:-translate-y-2 transition-all duration-300">
+                    <div class="absolute inset-0 bg-gradient-to-br from-brand-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="relative z-10 flex flex-col h-full justify-between space-y-8">
+                        <div class="flex justify-between items-start">
+                            <span class="px-4 py-1.5 bg-brand-400 text-slate-900 text-xs font-black rounded-full">TEAM 01</span>
+                            <div class="flex -space-x-2">
+                                <div class="w-8 h-8 rounded-full bg-slate-700 border-2 border-slate-900 flex items-center justify-center text-[10px] text-white font-bold">리더</div>
+                                <div class="w-8 h-8 rounded-full bg-slate-700 border-2 border-slate-900 flex items-center justify-center text-[10px] text-white font-bold">+6</div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-3xl font-black text-white mb-2 group-hover:text-brand-400 transition-colors">스티븐 호구킹</h3>
+                            <p class="text-slate-400 text-sm mb-4">대표 이준영 외 6명</p>
+                            <a href="https://open.kakao.com/o/gM2HLtxi" target="_blank" class="inline-flex items-center text-brand-400 font-bold text-sm hover:text-white transition-colors">
+                                오픈채팅으로 문의하기 <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2팀 -->
+                <div class="group relative bg-slate-900 rounded-[2rem] overflow-hidden p-8 hover:transform hover:-translate-y-2 transition-all duration-300">
+                    <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="relative z-10 flex flex-col h-full justify-between space-y-8">
+                        <div class="flex justify-between items-start">
+                            <span class="px-4 py-1.5 bg-indigo-400 text-slate-900 text-xs font-black rounded-full">TEAM 02</span>
+                            <div class="flex -space-x-2">
+                                <div class="w-8 h-8 rounded-full bg-slate-700 border-2 border-slate-900 flex items-center justify-center text-[10px] text-white font-bold">리더</div>
+                                <div class="w-8 h-8 rounded-full bg-slate-700 border-2 border-slate-900 flex items-center justify-center text-[10px] text-white font-bold">+6</div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-3xl font-black text-white mb-2 group-hover:text-indigo-400 transition-colors">κεραυνός <span class="text-lg text-slate-500 font-medium">(케라우노스)</span></h3>
+                            <p class="text-slate-400 text-sm mb-4">대표 박찬 외 6명</p>
+                            <a href="https://open.kakao.com/o/gEqZ23xi" target="_blank" class="inline-flex items-center text-indigo-400 font-bold text-sm hover:text-white transition-colors">
+                                오픈채팅으로 문의하기 <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3팀 -->
+                <div class="group relative bg-slate-900 rounded-[2rem] overflow-hidden p-8 hover:transform hover:-translate-y-2 transition-all duration-300">
+                    <div class="absolute inset-0 bg-gradient-to-br from-orange-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="relative z-10 flex flex-col h-full justify-between space-y-8">
+                        <div class="flex justify-between items-start">
+                            <span class="px-4 py-1.5 bg-orange-400 text-slate-900 text-xs font-black rounded-full">TEAM 03</span>
+                            <div class="flex -space-x-2">
+                                <div class="w-8 h-8 rounded-full bg-slate-700 border-2 border-slate-900 flex items-center justify-center text-[10px] text-white font-bold">리더</div>
+                                <div class="w-8 h-8 rounded-full bg-slate-700 border-2 border-slate-900 flex items-center justify-center text-[10px] text-white font-bold">+5</div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-3xl font-black text-white mb-2 group-hover:text-orange-400 transition-colors">폐동</h3>
+                            <p class="text-slate-400 text-sm mb-4">대표 박도현 외 5명</p>
+                            <a href="https://open.kakao.com/o/giuka8xi" target="_blank" class="inline-flex items-center text-orange-400 font-bold text-sm hover:text-white transition-colors">
+                                오픈채팅으로 문의하기 <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4팀 -->
+                <div class="group relative bg-slate-900 rounded-[2rem] overflow-hidden p-8 hover:transform hover:-translate-y-2 transition-all duration-300">
+                    <div class="absolute inset-0 bg-gradient-to-br from-rose-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="relative z-10 flex flex-col h-full justify-between space-y-8">
+                        <div class="flex justify-between items-start">
+                            <span class="px-4 py-1.5 bg-rose-400 text-slate-900 text-xs font-black rounded-full">TEAM 04</span>
+                            <div class="flex -space-x-2">
+                                <div class="w-8 h-8 rounded-full bg-slate-700 border-2 border-slate-900 flex items-center justify-center text-[10px] text-white font-bold">리더</div>
+                                <div class="w-8 h-8 rounded-full bg-slate-700 border-2 border-slate-900 flex items-center justify-center text-[10px] text-white font-bold">+6</div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-3xl font-black text-white mb-2 group-hover:text-rose-400 transition-colors">KC</h3>
+                            <p class="text-slate-400 text-sm mb-4">대표 박은찬 외 6명</p>
+                            <a href="https://open.kakao.com/o/gNImQbyi" target="_blank" class="inline-flex items-center text-rose-400 font-bold text-sm hover:text-white transition-colors">
+                                오픈채팅으로 문의하기 <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 모의 투자 참여 유도 (가장 중요한 타겟 대상 홍보 영역) -->
+    <section id="invest" class="py-24 bg-brand-400 relative overflow-hidden">
+        <!-- 배경 타이포그래피 장식 -->
+        <div class="absolute -right-10 -bottom-10 text-[200px] font-black text-black/5 leading-none pointer-events-none select-none">INVEST</div>
+        
+        <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
+            <div class="w-20 h-20 bg-slate-900 text-brand-400 rounded-3xl flex items-center justify-center text-4xl mx-auto shadow-2xl shadow-slate-900/30">
+                <i class="fa-solid fa-sack-dollar"></i>
+            </div>
+            
+            <h2 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+                당신의 가상 자산을<br>
+                유망한 아이디어에 투자하세요!
+            </h2>
+            
+            <p class="text-slate-800 text-base md:text-lg font-bold max-w-2xl mx-auto">
+                13차시부터 타 학급 학생들을 대상으로 <span class="bg-white px-2 py-0.5 rounded text-slate-900">통합 모의 주식 거래 사이트</span>가 개방됩니다.<br>
+                4개 팀의 IR 피칭을 듣고, 최고의 수익률을 달성할 워렌 버핏이 되어보세요.
+            </p>
+            
+            <div class="pt-8">
+                <!-- 실제 투자 사이트로 이동하도록 변경 -->
+                <a href="https://260406kjy-svg.github.io/54dshs104_oryang-stock/" target="_blank" class="inline-flex items-center justify-center px-10 py-5 bg-slate-900 text-white rounded-2xl font-black text-xl hover:bg-slate-800 hover:scale-105 transition-all duration-300 shadow-2xl">
+                    모의 투자 사이트 바로가기 <i class="fa-solid fa-arrow-right-to-bracket ml-3"></i>
+                </a>
+            </div>
+            <p class="text-sm text-slate-700/70 font-semibold mt-4">
+                * 본 시스템은 실제 금전 거래가 없는 교육용 시뮬레이션입니다. (개발: 김정윤 / 관리: 김준현, 박시후, 장태혁, 김건희)
+            </p>
+        </div>
+    </section>
+
+    <!-- 푸터 -->
+    <footer class="bg-slate-950 text-slate-400 py-12 border-t border-slate-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <div>
+                <p class="text-xl font-black text-white tracking-tight">오량 모의 창업 프로젝트</p>
+                <p class="text-sm mt-1 text-slate-500">Daejeon Daeshin High School Class 1-4</p>
+            </div>
+            <div class="text-center md:text-right">
+                <p class="text-sm font-bold text-slate-500">총괄 PM. 김정윤</p>
+                <p class="text-xs text-slate-600 mt-1">© 2026. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 스크롤 시 네비게이션 바 스타일 변경 스크립트 -->
+    <script>
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 20) {
+                navbar.classList.add('shadow-md');
+                navbar.classList.replace('py-2', 'py-0');
+            } else {
+                navbar.classList.remove('shadow-md');
+                navbar.classList.replace('py-0', 'py-2');
+            }
+        });
+    </script>
+</body>
+</html>
