@@ -407,12 +407,11 @@
             if (snapshot.empty) {
                 // 가상의 창업 팀 데이터 생성 (최초 1회)
                 const mockTeams = [
-                    { id: 'team_a', name: '에코라이프', product: '친환경 스마트 텀블러', price: 5000, history: [5000], color: 'bg-green-100', icon: 'fa-leaf' },
-                    { id: 'team_b', name: '스마트학습', product: 'AI 맞춤형 플래너', price: 6200, history: [6200], color: 'bg-blue-100', icon: 'fa-book-open' },
-                    { id: 'team_c', name: '헬시스낵', product: '단백질 듬뿍 비건 쿠키', price: 4800, history: [4800], color: 'bg-yellow-100', icon: 'fa-cookie' },
-                    { id: 'team_d', name: '테크노베이션', product: '초보자 코딩 교육 키트', price: 7500, history: [7500], color: 'bg-purple-100', icon: 'fa-microchip' },
-                    { id: 'team_e', name: '아트메이커', product: '나만의 커스텀 굿즈 제작', price: 4100, history: [4100], color: 'bg-pink-100', icon: 'fa-palette' },
-                ];
+                    { id: 'team_a', name: '스티븐 호구킹', product: '탄소 배출 조절 AI 시스템', price: 5000, history: [5000], color: 'bg-green-100', icon: 'fa-leaf' },
+                    { id: 'team_b', name: 'KERAUNOS', product: '펀드 기업', price: 6200, history: [6200], color: 'bg-blue-100', icon: 'fa-book-open' },
+                    { id: 'team_c', name: '폐동', product: '파일 정리 시스템', price: 4800, history: [4800], color: 'bg-yellow-100', icon: 'fa-cookie' },
+                    { id: 'team_d', name: 'KC', product: '친환경 로켓 개발팀', price: 7500, history: [7500], color: 'bg-purple-100', icon: 'fa-microchip' },
+                    ];
                 
                 const batch = writeBatch(db);
                 mockTeams.forEach(team => {
