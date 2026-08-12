@@ -60,7 +60,7 @@
                 <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-6 h-6" alt="Google">
                 Google 계정으로 시작하기
             </button>
-            <p class="text-xs text-gray-400 mt-4">오량 모의 창업 프로젝트 참가자 전용</p>
+            <p class="text-xs text-gray-400 mt-4">오량 모의 창업 프로젝트 참가자 전용 · 탭을 닫으면 자동 로그아웃</p>
         </div>
     </div>
 
@@ -140,6 +140,10 @@
             
             <div class="bg-white rounded-2xl p-6 shadow-sm border border-lime-100 mb-6">
                 <h3 class="text-lg font-bold mb-4 border-b pb-2">기본 정보</h3>
+                <div class="mb-4">
+                    <label class="block text-sm text-gray-500 mb-1" for="profile-name">이름</label>
+                    <input id="profile-name" type="text" maxlength="20" autocomplete="name" placeholder="이름을 입력하세요" class="w-full p-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-lime-500">
+                </div>
                 <div class="flex flex-col sm:flex-row gap-4">
                     <div class="flex-1">
                         <label class="block text-sm text-gray-500 mb-1">학년</label>
@@ -160,8 +164,8 @@
                             <option value="6">6반</option>
                             <option value="7">7반</option>
                             <option value="8">8반</option>
-                            <option value="8">9반</option>
-                            <option value="8">10반</option>
+                            <option value="9">9반</option>
+                            <option value="10">10반</option>
                         </select>
                     </div>
                 </div>
@@ -209,7 +213,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithPopup, signOut, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInWithPopup, signOut, setPersistence, browserSessionPersistence, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==========================================
@@ -241,6 +245,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+        await setPersistence(auth, browserSessionPersistence);
         const ALLOWED_EMAIL_DOMAIN = 'dshs.kr';
 
         const isAllowedSchoolAccount = (user) => {
@@ -366,7 +371,7 @@
                 }
 
                 window.appState.user = user;
-                await initializeUserData(user.uid);
+                await initializeUserData(user);
                 await initializeTeamsData();
                 
                 document.getElementById('login-screen').classList.add('hidden');
@@ -385,13 +390,14 @@
         });
 
         // 사용자 데이터 초기화 및 구독
-        async function initializeUserData(userId) {
-            const userRef = doc(db, 'artifacts', appId, 'users', userId, 'profile', 'data');
+        async function initializeUserData(user) {
+            const userRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
             const userSnap = await getDoc(userRef);
 
             if (!userSnap.exists()) {
                 // 신규 유저 초기 자금 10,000,000원 설정
                 await setDoc(userRef, {
+                    name: user.displayName || '',
                     grade: '1',
                     class: '1',
                     balance: 10000000,
@@ -416,21 +422,34 @@
         async function initializeTeamsData() {
             const teamsCol = collection(db, 'artifacts', appId, 'public', 'data', 'teams');
             const snapshot = await getDocs(teamsCol);
+            const teamDefinitions = [
+                { id: 'team_a', name: '스티븐 호구킹', product: '탄소배출권 거래 시점 예측 AI 보조 시스템', price: 5000, history: [5000], color: 'bg-green-100', icon: 'fa-leaf' },
+                { id: 'team_b', name: 'KERAUNOS', product: 'ESG 가치 기반 헤지펀드형 모의투자', price: 6200, history: [6200], color: 'bg-blue-100', icon: 'fa-chart-line' },
+                { id: 'team_c', name: '폐동', product: '누구나 쉽게 쓰는 파일 정리·관리 앱', price: 4800, history: [4800], color: 'bg-yellow-100', icon: 'fa-folder-tree' },
+                { id: 'team_d', name: 'KC', product: '재사용 로켓 랜딩 기어·그리드 핀 설계', price: 7500, history: [7500], color: 'bg-purple-100', icon: 'fa-rocket' },
+            ];
+            const batch = writeBatch(db);
+            let hasTeamUpdates = false;
             
             if (snapshot.empty) {
-                // 가상의 창업 팀 데이터 생성 (최초 1회)
-                const mockTeams = [
-                    { id: 'team_a', name: '스티븐 호구킹', product: '탄소 배출 조절 AI 시스템', price: 5000, history: [5000], color: 'bg-green-100', icon: 'fa-leaf' },
-                    { id: 'team_b', name: 'KERAUNOS', product: '펀드 기업', price: 6200, history: [6200], color: 'bg-blue-100', icon: 'fa-book-open' },
-                    { id: 'team_c', name: '폐동', product: '파일 정리 시스템', price: 4800, history: [4800], color: 'bg-yellow-100', icon: 'fa-cookie' },
-                    { id: 'team_d', name: 'KC', product: '친환경 로켓 개발팀', price: 7500, history: [7500], color: 'bg-purple-100', icon: 'fa-microchip' },
-                    ];
-                
-                const batch = writeBatch(db);
-                mockTeams.forEach(team => {
+                // Classroom 제출 자료 기반 창업 팀 데이터 생성 (최초 1회)
+                teamDefinitions.forEach(team => {
                     const docRef = doc(teamsCol, team.id);
                     batch.set(docRef, team);
+                    hasTeamUpdates = true;
                 });
+            } else {
+                const existingTeams = new Map(snapshot.docs.map(teamDoc => [teamDoc.id, teamDoc.data()]));
+                teamDefinitions.forEach(({ id, name, product, color, icon }) => {
+                    const existing = existingTeams.get(id);
+                    if (!existing || existing.name !== name || existing.product !== product || existing.color !== color || existing.icon !== icon) {
+                        batch.set(doc(teamsCol, id), { name, product, color, icon }, { merge: true });
+                        hasTeamUpdates = true;
+                    }
+                });
+            }
+
+            if (hasTeamUpdates) {
                 await batch.commit();
             }
 
@@ -438,7 +457,9 @@
             teamsUnsubscribe = onSnapshot(teamsCol, (snapshot) => {
                 const teams = [];
                 snapshot.forEach(doc => {
-                    teams.push({ id: doc.id, ...doc.data() });
+                    if (teamDefinitions.some(team => team.id === doc.id)) {
+                        teams.push({ id: doc.id, ...doc.data() });
+                    }
                 });
                 
                 window.appState.teams = teams;
@@ -702,6 +723,7 @@
             const userData = window.appState.userData;
             if(!userData) return;
 
+            document.getElementById('profile-name').value = userData.name || window.appState.user?.displayName || '';
             document.getElementById('profile-grade').value = userData.grade || '1';
             document.getElementById('profile-class').value = userData.class || '1';
             
@@ -749,14 +771,21 @@
         window.saveProfile = async () => {
             if(!window.appState.user) return;
             
+            const name = document.getElementById('profile-name').value.trim();
             const grade = document.getElementById('profile-grade').value;
             const cls = document.getElementById('profile-class').value;
             const userId = window.appState.user.uid;
+
+            if (!name) {
+                window.showModal('입력 확인', '이름을 입력해 주세요.', 'error');
+                return;
+            }
             
             const userRef = doc(db, 'artifacts', appId, 'users', userId, 'profile', 'data');
             
             try {
                 await updateDoc(userRef, {
+                    name: name,
                     grade: grade,
                     class: cls
                 });
