@@ -192,7 +192,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInWithPopup, signOut, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, addDoc, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // 학생용과 동일한 Firebase 설정을 입력하세요
@@ -216,6 +216,12 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+        const ALLOWED_EMAIL_DOMAIN = 'dshs.kr';
+
+        const isAllowedSchoolAccount = (user) => {
+            const email = user?.email?.trim().toLowerCase() || '';
+            return user?.emailVerified === true && email.endsWith(`@${ALLOWED_EMAIL_DOMAIN}`);
+        };
 
         window.appState = {
             user: null,
@@ -303,17 +309,19 @@
             btn.disabled = true;
 
             try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token && Object.keys(myFirebaseConfig).length === 0) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else if (Object.keys(myFirebaseConfig).length > 0) {
-                    const provider = new GoogleAuthProvider();
-                    await signInWithPopup(auth, provider);
-                } else {
-                    await signInAnonymously(auth);
-                }
+                const provider = new GoogleAuthProvider();
+                provider.setCustomParameters({
+                    hd: ALLOWED_EMAIL_DOMAIN,
+                    prompt: 'select_account'
+                });
+
+                await signInWithPopup(auth, provider);
             } catch (error) {
                 console.error("Auth error:", error);
-                window.showModal('인증 실패', `오류: ${error.message}`, 'error');
+                if (error.code !== 'auth/popup-closed-by-user') {
+                    window.showModal('인증 실패', '로그인 중 문제가 발생했습니다.', 'error');
+                }
+            } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }
@@ -321,6 +329,12 @@
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
+                if (!isAllowedSchoolAccount(user)) {
+                    await signOut(auth);
+                    window.showModal('로그인 제한', 'dshs.kr 학교 계정으로만 로그인할 수 있습니다.', 'error');
+                    return;
+                }
+
                 window.appState.user = user;
                 
                 // 관리자 접속 기록 남기기 (존재 여부 등록)
